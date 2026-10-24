@@ -1,0 +1,12 @@
+{
+  "name": "campusloop",
+  "version": "1.0.0",
+  "description": "CampusLoop — Smart Campus Lost & Found Portal",
+  "scripts": {
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "seed": "cd server && npm run seed",
+    "dev": "start cmd /k \"cd server && npm run dev\" && start cmd /k \"cd client && npm start\""
+  }
+}
