@@ -44,7 +44,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ─── Logging ──────────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'test') app.use(morgan('dev'));
 
-// ─── Static Files ─────────────────────────────────────────────────────────────
+// ─── Static Files & Uploads ───────────────────────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ─── Database Connection (with Serverless Caching) ────────────────────────────
@@ -76,7 +76,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// ─── API Routes ───────────────────────────────────────────────────────────────
 const healthRouter = require('./routes/health');
 const authRouter = require('./routes/auth');
 const itemsRouter = require('./routes/items');
@@ -87,7 +87,6 @@ const adminRouter = require('./routes/admin');
 const contactRouter = require('./routes/contact');
 const matchesRouter = require('./routes/matches');
 
-// Mount routes on both /api/* and /* for full compatibility
 const routeList = [
   ['health', healthRouter],
   ['auth', authRouter],
@@ -105,7 +104,16 @@ routeList.forEach(([routePath, router]) => {
   app.use(`/${routePath}`, router);
 });
 
-// ─── 404 ──────────────────────────────────────────────────────────────────────
+// ─── Serve React Frontend Build ───────────────────────────────────────────────
+const clientBuildPath = path.join(__dirname, '../client/build');
+app.use(express.static(clientBuildPath));
+
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
+
+// ─── 404 for unhandled API requests ───────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'API route not found' });
 });
@@ -120,7 +128,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ─── Local Server Start (only outside Vercel) ──────────────────────────────────
+// ─── Server Start ─────────────────────────────────────────────────────────────
 if (!process.env.VERCEL) {
   const PORT = process.env.PORT || 5000;
   connectDB().then(() => {
