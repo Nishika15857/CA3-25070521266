@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// When deployed on Vercel, requests use relative '/api' on the same domain
+// When developing locally, requests go to '/api' proxied by package.json to localhost:5000
+const API_BASE = process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim() !== ''
+  ? process.env.REACT_APP_API_URL
+  : '/api';
 
 const api = axios.create({
   baseURL: API_BASE,

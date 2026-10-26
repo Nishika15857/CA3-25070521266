@@ -11,34 +11,29 @@ const path = require('path');
 const app = express();
 
 // ─── Security Middleware ──────────────────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
 app.use(mongoSanitize());
 
 // ─── Rate Limiting ────────────────────────────────────────────────────────────
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 500,
   message: { success: false, message: 'Too many requests, please try again later.' }
 });
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: 50,
   message: { success: false, message: 'Too many auth attempts, please try again later.' }
 });
 app.use('/api/', limiter);
 app.use('/api/auth/', authLimiter);
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:3000',
-  'http://localhost:3000',
-  'http://localhost:5173'
-];
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: true,
   credentials: true
 }));
 
@@ -52,20 +47,67 @@ if (process.env.NODE_ENV !== 'test') app.use(morgan('dev'));
 // ─── Static Files ─────────────────────────────────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// ─── Database Connection (with Serverless Caching) ────────────────────────────
+const DEFAULT_MONGO_URI = 'mongodb+srv://nishikakalamkar8_db_user:Campus12345@cluster0.zrspaj2.mongodb.net/campusloop?retryWrites=true&w=majority';
+const MONGO_URI = process.env.MONGO_URI || DEFAULT_MONGO_URI;
+
+let isConnecting = false;
+const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return;
+  if (isConnecting) return;
+  isConnecting = true;
+  try {
+    await mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 8000
+    });
+    console.log('✅ MongoDB connected');
+  } catch (err) {
+    console.error('❌ MongoDB connection failed:', err.message);
+  } finally {
+    isConnecting = false;
+  }
+};
+
+// Ensure database is connected before handling any API request
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState < 1) {
+    await connectDB();
+  }
+  next();
+});
+
 // ─── Routes ───────────────────────────────────────────────────────────────────
-app.use('/api/health',     require('./routes/health'));
-app.use('/api/auth',       require('./routes/auth'));
-app.use('/api/items',      require('./routes/items'));
-app.use('/api/claims',     require('./routes/claims'));
-app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/users',      require('./routes/users'));
-app.use('/api/admin',      require('./routes/admin'));
-app.use('/api/contact',    require('./routes/contact'));
-app.use('/api/matches',    require('./routes/matches'));
+const healthRouter = require('./routes/health');
+const authRouter = require('./routes/auth');
+const itemsRouter = require('./routes/items');
+const claimsRouter = require('./routes/claims');
+const notificationsRouter = require('./routes/notifications');
+const usersRouter = require('./routes/users');
+const adminRouter = require('./routes/admin');
+const contactRouter = require('./routes/contact');
+const matchesRouter = require('./routes/matches');
+
+// Mount routes on both /api/* and /* for full compatibility
+const routeList = [
+  ['health', healthRouter],
+  ['auth', authRouter],
+  ['items', itemsRouter],
+  ['claims', claimsRouter],
+  ['notifications', notificationsRouter],
+  ['users', usersRouter],
+  ['admin', adminRouter],
+  ['contact', contactRouter],
+  ['matches', matchesRouter]
+];
+
+routeList.forEach(([routePath, router]) => {
+  app.use(`/api/${routePath}`, router);
+  app.use(`/${routePath}`, router);
+});
 
 // ─── 404 ──────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+  res.status(404).json({ success: false, message: 'API route not found' });
 });
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────
@@ -78,16 +120,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ─── Database & Server Start ──────────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/campusloop')
-  .then(() => {
-    console.log('✅ MongoDB connected');
+// ─── Local Server Start (only outside Vercel) ──────────────────────────────────
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  connectDB().then(() => {
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch(err => {
-    console.error('❌ MongoDB connection failed:', err.message);
-    process.exit(1);
   });
+}
 
 module.exports = app;

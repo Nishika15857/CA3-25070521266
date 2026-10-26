@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'campusloop_super_secret_jwt_key_change_in_production';
+
 // Protect routes — JWT required
 exports.protect = async (req, res, next) => {
   try {
@@ -11,7 +13,7 @@ exports.protect = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({ success: false, message: 'Not authenticated. Please log in.' });
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(decoded.id).select('+role +isActive');
     if (!user) {
       return res.status(401).json({ success: false, message: 'User no longer exists.' });
@@ -37,7 +39,7 @@ exports.optionalAuth = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
     }
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
       const user = await User.findById(decoded.id);
       if (user && user.isActive) req.user = user;
     }
