@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const mongoSanitize = require('express-mongo-sanitize');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 
@@ -73,6 +74,12 @@ app.use(async (req, res, next) => {
   if (mongoose.connection.readyState < 1) {
     await connectDB();
   }
+  if (mongoose.connection.readyState < 1 && (req.path.startsWith('/api') || req.path.startsWith('/auth') || req.path.startsWith('/items')) && !req.path.includes('/health')) {
+    return res.status(503).json({
+      success: false,
+      message: 'Database connection unavailable. Please check MongoDB Atlas IP access.'
+    });
+  }
   next();
 });
 
@@ -105,12 +112,19 @@ routeList.forEach(([routePath, router]) => {
 });
 
 // ─── Serve React Frontend Build ───────────────────────────────────────────────
-const clientBuildPath = path.join(__dirname, '../client/build');
+const clientBuildPath = fs.existsSync(path.join(__dirname, '../client/build'))
+  ? path.join(__dirname, '../client/build')
+  : (fs.existsSync(path.join(__dirname, '../build')) ? path.join(__dirname, '../build') : path.join(__dirname, 'client/build'));
 app.use(express.static(clientBuildPath));
 
 app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api')) return next();
-  res.sendFile(path.join(clientBuildPath, 'index.html'));
+  if (req.path.startsWith('/api') || req.path.startsWith('/auth') || req.path.startsWith('/items') || req.path.startsWith('/claims')) return next();
+  const indexFile = path.join(clientBuildPath, 'index.html');
+  if (fs.existsSync(indexFile)) {
+    res.sendFile(indexFile);
+  } else {
+    next();
+  }
 });
 
 // ─── 404 for unhandled API requests ───────────────────────────────────────────

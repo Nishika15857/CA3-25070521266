@@ -33,7 +33,15 @@ export default function Register() {
       toast.success('Account created! Welcome to CampusLoop 🎉');
       navigate('/dashboard');
     } catch (err) {
-      const msg = err.response?.data?.message || 'Registration failed.';
+      const serverErrors = err.response?.data?.errors;
+      if (Array.isArray(serverErrors) && serverErrors.length > 0) {
+        const fieldErrors = {};
+        serverErrors.forEach(e => { if (e.field) fieldErrors[e.field] = e.message; });
+        setErrors(fieldErrors);
+        toast.error(serverErrors[0].message);
+        return;
+      }
+      const msg = err.response?.data?.message || err.message || 'Registration failed.';
       toast.error(msg);
       if (msg.toLowerCase().includes('email')) setErrors({ email: msg });
     } finally { setLoading(false); }

@@ -30,9 +30,9 @@ export default function Login() {
       toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (err) {
-      const msg = err.response?.data?.message || 'Login failed. Please try again.';
+      const msg = err.response?.data?.message || err.message || 'Login failed. Please try again.';
       toast.error(msg);
-      if (msg.includes('password')) setErrors({ password: msg });
+      if (msg.toLowerCase().includes('password')) setErrors({ password: msg });
       else setErrors({ email: msg });
     } finally { setLoading(false); }
   };
