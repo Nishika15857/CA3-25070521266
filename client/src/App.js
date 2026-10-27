@@ -5,6 +5,34 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LoadingPage from './components/LoadingPage';
 
+// Simple ErrorBoundary to prevent blank white screens
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
+          <h2 style={{ color: 'var(--primary, #16a34a)', marginBottom: '0.5rem' }}>🔁 CampusLoop</h2>
+          <p style={{ color: 'var(--text-secondary, #64748b)', marginBottom: '1.5rem' }}>An error occurred while loading this section.</p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary">
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // Lazy-loaded pages
 const Home          = lazy(() => import('./pages/Home'));
 const Browse        = lazy(() => import('./pages/Browse'));
@@ -40,7 +68,7 @@ const PublicRoute = ({ children }) => {
 
 function App() {
   return (
-    <>
+    <ErrorBoundary>
       <Navbar />
       <main>
         <Suspense fallback={<LoadingPage />}>
@@ -66,7 +94,7 @@ function App() {
         </Suspense>
       </main>
       <Footer />
-    </>
+    </ErrorBoundary>
   );
 }
 

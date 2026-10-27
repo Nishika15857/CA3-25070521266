@@ -31,8 +31,10 @@ export default function Home() {
   useEffect(() => {
     Promise.all([itemService.getStats(), itemService.getRecent()])
       .then(([statsRes, recentRes]) => {
-        setStats(statsRes.data.stats);
-        setRecent(recentRes.data);
+        if (statsRes?.data?.stats) setStats(statsRes.data.stats);
+        if (recentRes?.data && typeof recentRes.data === 'object' && Array.isArray(recentRes.data.recentLost)) {
+          setRecent(recentRes.data);
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -158,7 +160,7 @@ export default function Home() {
           </div>
           {loading ? (
             <div className="loading-center"><div className="spinner" /></div>
-          ) : recent.recentLost.length > 0 ? (
+          ) : recent?.recentLost?.length > 0 ? (
             <div className="grid grid-auto">
               {recent.recentLost.map(item => <ItemCard key={item._id} item={item} />)}
             </div>
@@ -185,7 +187,7 @@ export default function Home() {
           </div>
           {loading ? (
             <div className="loading-center"><div className="spinner" /></div>
-          ) : recent.recentFound.length > 0 ? (
+          ) : recent?.recentFound?.length > 0 ? (
             <div className="grid grid-auto">
               {recent.recentFound.map(item => <ItemCard key={item._id} item={item} />)}
             </div>

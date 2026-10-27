@@ -19,9 +19,17 @@ api.interceptors.request.use(config => {
   return config;
 });
 
-// Handle 401 globally
+// Handle responses & guard against HTML error responses
 api.interceptors.response.use(
-  res => res,
+  res => {
+    const contentType = res.headers ? (res.headers['content-type'] || '') : '';
+    if (typeof res.data === 'string' && contentType.includes('text/html')) {
+      const err = new Error('Backend API is currently offline');
+      err.response = { status: 503, data: { success: false, message: 'Backend service offline.' } };
+      return Promise.reject(err);
+    }
+    return res;
+  },
   err => {
     if (err.response?.status === 401) {
       localStorage.removeItem('cl_token');
