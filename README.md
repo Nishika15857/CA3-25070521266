@@ -1,12 +1,10 @@
 # 🔁 CampusLoop — Smart Campus Lost & Found Portal
 
-### 🎓 Student & Project Details
-- **Student Name:** Nishika Sumer Kalamkar
-- **Student PRN:** 25070521266
-- **Project Type:** FLEXI CA-3 Mini-Project
-- **Department:** Computer Science Engineering (CSE)
-- **Year:** Second Year
-- **Stack:** MERN (MongoDB, Express, React, Node.js)
+**Student PRN:** 25070521266  
+**Project Type:** FLEXI CA-3 Mini-Project  
+**Department:** Computer Science Engineering (CSE)  
+**Year:** Second Year  
+**Stack:** MERN (MongoDB, Express, React, Node.js)  
 
 ---
 
@@ -30,29 +28,25 @@ A complete full-stack MERN web application for reporting, searching and recoveri
 
 ## 📸 Screenshots
 
-### 1. Homepage & Live Statistics
-![CampusLoop Homepage](screenshots/01_homepage.png)
+### 1. Website Interface
+A view of the CampusLoop application and its user interface.
 
-### 2. Browse Lost & Found Items
-![Browse Lost & Found Items](screenshots/02_browse_items.png)
+![Website Interface](screenshots/01_homepage.png)
 
-### 3. User Login
-![User Login](screenshots/03_login.png)
+### 2. Website Functionality
+A view demonstrating the working website features.
 
-### 4. User Registration
-![User Registration](screenshots/04_register.png)
+![Website Functionality](screenshots/02_browse_items.png)
 
-### 5. Report Lost Item
-![Report Lost Item](screenshots/05_report_lost.png)
+### 3. MongoDB Compass Database
+Shows the CampusLoop database and its collections in MongoDB Compass.
 
-### 6. Report Found Item
-![Report Found Item](screenshots/06_report_found.png)
+![MongoDB Compass Database](screenshots/03_mongodb_compass.png)
 
-### 7. User Dashboard
-![User Dashboard](screenshots/07_dashboard.png)
+### 4. Backend and MongoDB Connection
+Shows the local backend starting successfully, connecting to MongoDB, and running on port 5000.
 
-### 8. About CampusLoop
-![About CampusLoop](screenshots/08_about.png)
+![Backend and MongoDB Connection](screenshots/04_backend_connection.png)
 
 ---
 
