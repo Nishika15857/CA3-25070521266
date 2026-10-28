@@ -1,5 +1,15 @@
 # 🔁 CampusLoop — Smart Campus Lost & Found Portal
 
+### 🎓 Student & Project Details
+- **Student Name:** Nishika Sumer Kalamkar
+- **Student PRN:** 25070521266
+- **Project Type:** FLEXI CA-3 Mini-Project
+- **Department:** Computer Science Engineering (CSE)
+- **Year:** Second Year
+- **Stack:** MERN (MongoDB, Express, React, Node.js)
+
+---
+
 <div align="center">
 
 ![STATUS](https://img.shields.io/badge/STATUS-COMPLETED-brightgreen?style=for-the-badge)
@@ -20,7 +30,29 @@ A complete full-stack MERN web application for reporting, searching and recoveri
 
 ## 📸 Screenshots
 
-> _Screenshots will be added after the live deployment is complete._
+### 1. Homepage & Live Statistics
+![CampusLoop Homepage](screenshots/01_homepage.png)
+
+### 2. Browse Lost & Found Items
+![Browse Lost & Found Items](screenshots/02_browse_items.png)
+
+### 3. User Login
+![User Login](screenshots/03_login.png)
+
+### 4. User Registration
+![User Registration](screenshots/04_register.png)
+
+### 5. Report Lost Item
+![Report Lost Item](screenshots/05_report_lost.png)
+
+### 6. Report Found Item
+![Report Found Item](screenshots/06_report_found.png)
+
+### 7. User Dashboard
+![User Dashboard](screenshots/07_dashboard.png)
+
+### 8. About CampusLoop
+![About CampusLoop](screenshots/08_about.png)
 
 ---
 
